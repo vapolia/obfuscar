@@ -1,6 +1,24 @@
 Obfuscar
 ========
 
+# Changes in this fork
+- Fix crash when xaml embedded resources can not be loaded (as it can not be xaml!)
+- Xamarin libs are supported
+- All projects migrated to .Net5
+
+Get git dependencies:
+```
+git submodule init
+git submodule update
+```
+
+Build nuget:
+```
+.\release.ps1
+```
+
+# Original github below
+
 [![NuGet Version](https://img.shields.io/nuget/v/Obfuscar.svg?style=flat-square)](https://www.nuget.org/packages/Obfuscar/)
 [![Build status](https://img.shields.io/appveyor/ci/lextm/obfuscar/master.svg?label=appvejor&style=flat-square)](https://ci.appveyor.com/project/lextm/obfuscar)
 
