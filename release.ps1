@@ -1,58 +1,19 @@
-$msBuild = "msbuild"
-try
-{
-    & $msBuild /version
-    Write-Host "Likely on Linux/macOS."
-}
-catch
-{
-    Write-Host "MSBuild doesn't exist. Use VSSetup instead."
-
-    Install-Module VSSetup -Scope CurrentUser -Force
-    $instance = Get-VSSetupInstance -All | Select-VSSetupInstance -Latest
-    $installDir = $instance.installationPath
-    $msBuild = $installDir + '\MSBuild\Current\Bin\MSBuild.exe'
-    if (!(Test-Path $msBuild))
-    {
-        $msBuild = $installDir + '\MSBuild\15.0\Bin\MSBuild.exe'
-        if (!(Test-Path $msBuild))
-        {
-            $instance = Get-VSSetupInstance -All -Prerelease | Select-VSSetupInstance -Latest
-            $installDir = $instance.installationPath
-            $msBuild = $installDir + '\MSBuild\Current\Bin\MSBuild.exe'
-            if (!(Test-Path $msBuild))
-            {
-                $msBuild = $installDir + '\MSBuild\15.0\Bin\MSBuild.exe'
-                if (!(Test-Path $msBuild))
-                {
-                    Write-Host "MSBuild doesn't exist. Exit."
-                    exit 1
-                }
-                else
-                {
-                    Write-Host "Likely on Windows with VS2017 Preview."
-                }
-            }
-            else
-            {
-                Write-Host "Likely on Windows with VS2019 Preview."
-            }
-        }
-        else
-        {
-            Write-Host "Likely on Windows with VS2017."
-        }
-    }
-    else
-    {
-        Write-Host "Likely on Windows with VS2019."
-    }
+if ($IsMacOS) {
+    $msbuild = "msbuild"
+} else {
+    $vswhere = 'C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe'
+    $msbuild = & $vswhere -latest -products * -requires Microsoft.Component.MSBuild -property installationPath
+    $msbuild = join-path $msbuild 'MSBuild\Current\Bin\MSBuild.exe'
 }
 
-Write-Host "MSBuild found. Compile the projects."
+#####################
+#Build release config
+$version="2.2.30"
+$versionSuffix="-pre1"
+$nugetVersion="$version$versionSuffix"
+#$versionSuffix=".$env:BUILD_NUMBER" 
 
-& $msBuild obfuscar.sln /p:Configuration=Release /t:restore
-& $msBuild obfuscar.sln /p:Configuration=Release /t:clean
-& $msBuild obfuscar.sln /p:Configuration=Release
+& $msBuild obfuscar.sln /p:Configuration=Release /p:Version="$version" /p:VersionSuffix="$versionSuffix" --% /t:Clean;Build
+if ($lastexitcode -ne 0) { exit $lastexitcode; }
 
-Write-Host "Compilation finished."
+nuget pack "Obfuscar.nuspec" -Version $nugetVersion

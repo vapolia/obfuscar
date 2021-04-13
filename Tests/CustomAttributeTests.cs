@@ -33,6 +33,7 @@ using Obfuscar;
 
 namespace ObfuscarTests
 {
+    [Collection("CustomAttributeTests")]
     public class CustomAttributeTests
     {
         public string BuildAndObfuscate()

@@ -30,6 +30,8 @@ using System.IO;
 using Mono.Cecil;
 using Xunit;
 
+[assembly: CollectionBehavior(CollectionBehavior.CollectionPerClass, DisableTestParallelization = true, MaxParallelThreads = 1)]
+
 namespace ObfuscarTests
 {
     static class AssemblyHelper

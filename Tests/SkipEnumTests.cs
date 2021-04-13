@@ -33,6 +33,7 @@ using Xunit;
 
 namespace ObfuscarTests
 {
+    [Collection("SkipEnumTests")]
     public class SkipEnumTests
     {
         protected void CheckEnums(string name, int expectedTypes, string[] expected, string[] notExpected)

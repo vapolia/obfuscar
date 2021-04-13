@@ -712,13 +712,13 @@ namespace Obfuscar
         private List<BamlDocument> GetXamlDocuments(AssemblyDefinition library)
         {
             var result = new List<BamlDocument>();
-            foreach (Resource res in library.MainModule.Resources)
+            foreach (var res in library.MainModule.Resources)
             {
                 var embed = res as EmbeddedResource;
                 if (embed == null)
                     continue;
 
-                Stream s = embed.GetResourceStream();
+                var s = embed.GetResourceStream();
                 s.Position = 0;
                 ResourceReader reader;
                 try
@@ -729,18 +729,23 @@ namespace Obfuscar
                 {
                     continue;
                 }
+                catch (BadImageFormatException)
+                {
+                    continue;
+                }
 
-                foreach (DictionaryEntry entry in reader.Cast<DictionaryEntry>().OrderBy(e => e.Key.ToString()))
+                foreach (var entry in reader.Cast<DictionaryEntry>().OrderBy(e => e.Key.ToString()))
                 {
                     if (entry.Key.ToString().EndsWith(".baml", StringComparison.OrdinalIgnoreCase))
                     {
-                        Stream stream;
-                        var value = entry.Value as Stream;
-                        if (value != null)
-                            stream = value;
-                        else if (entry.Value is byte[])
-                            stream = new MemoryStream((byte[]) entry.Value);
-                        else
+                        var stream = entry.Value switch
+                        {
+                            Stream ss => ss,
+                            byte[] bytes => new MemoryStream(bytes),
+                            _ => null
+                        };
+                        
+                        if(stream == null)
                             continue;
 
                         try
